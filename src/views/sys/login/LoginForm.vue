@@ -32,7 +32,7 @@
           v-model:value="formData.code"
           :placeholder="t('sys.login.code')"
         />
-        <Image :src="codeImg" :height="40" />
+        <Image :src="codeImg" :height="40" :preview="false" @click="refreshCode" />
       </div>
     </FormItem>
 
@@ -93,7 +93,7 @@
   </Form>
 </template>
 <script lang="ts" setup>
-  import { reactive, ref, unref, computed } from 'vue';
+  import { reactive, ref, unref, computed, watchEffect } from 'vue';
 
   import { Checkbox, Form, Input, Row, Col, Button, Divider, Image } from 'ant-design-vue';
   import {
@@ -176,8 +176,15 @@
   }
   const codeImg = ref('http://localhost:5173/src/assets/svg/login-box-bg.svg');
   const uuid = ref('');
-  getCaptcha().then((res) => {
-    codeImg.value = res.data.data;
-    uuid.value = res.data.id;
+
+  function refreshCode() {
+    getCaptcha().then((res) => {
+      codeImg.value = res.data.data;
+      uuid.value = res.data.id;
+    });
+  }
+
+  watchEffect(() => {
+    refreshCode();
   });
 </script>
