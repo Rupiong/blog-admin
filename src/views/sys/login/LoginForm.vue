@@ -24,6 +24,17 @@
         :placeholder="t('sys.login.password')"
       />
     </FormItem>
+    <FormItem name="code" class="enter-x">
+      <div class="w-full flex items-center gap-2">
+        <Input
+          size="large"
+          visibilityToggle
+          v-model:value="formData.code"
+          :placeholder="t('sys.login.code')"
+        />
+        <Image :src="codeImg" :height="40" />
+      </div>
+    </FormItem>
 
     <ARow class="enter-x">
       <ACol :span="12">
@@ -84,7 +95,7 @@
 <script lang="ts" setup>
   import { reactive, ref, unref, computed } from 'vue';
 
-  import { Checkbox, Form, Input, Row, Col, Button, Divider } from 'ant-design-vue';
+  import { Checkbox, Form, Input, Row, Col, Button, Divider, Image } from 'ant-design-vue';
   import {
     GithubFilled,
     WechatFilled,
@@ -100,6 +111,7 @@
   import { useUserStore } from '@/store/modules/user';
   import { LoginStateEnum, useLoginState, useFormRules, useFormValid } from './useLogin';
   import { useDesign } from '@/hooks/web/useDesign';
+  import { getCaptcha } from '@/api/sys/user';
   //import { onKeyStroke } from '@vueuse/core';
 
   const ACol = Col;
@@ -119,8 +131,9 @@
   const rememberMe = ref(false);
 
   const formData = reactive({
-    account: 'vben',
+    account: 'admin',
     password: '123456',
+    code: '',
   });
 
   const { validForm } = useFormValid(formRef);
@@ -131,14 +144,19 @@
 
   async function handleLogin() {
     const data = await validForm();
+    console.log(data, 'data');
     if (!data) return;
     try {
       loading.value = true;
-      const userInfo = await userStore.login({
+      const params = {
         password: data.password,
         username: data.account,
+        code: data.code,
+        uuid: uuid.value,
         mode: 'none', //不要默认的错误提示
-      });
+      };
+      console.log(params, 'params');
+      const userInfo = await userStore.login(params);
       if (userInfo) {
         notification.success({
           message: t('sys.login.loginSuccessTitle'),
@@ -156,4 +174,10 @@
       loading.value = false;
     }
   }
+  const codeImg = ref('http://localhost:5173/src/assets/svg/login-box-bg.svg');
+  const uuid = ref('');
+  getCaptcha().then((res) => {
+    codeImg.value = res.data.data;
+    uuid.value = res.data.id;
+  });
 </script>

@@ -4,11 +4,12 @@ import { LoginParams, LoginResultModel, GetUserInfoModel } from './model/userMod
 import { ErrorMessageMode } from '#/axios';
 
 enum Api {
-  Login = '/login',
+  Login = '/api/v1/login',
   Logout = '/logout',
-  GetUserInfo = '/getUserInfo',
+  GetUserInfo = '/api/v1/getinfo',
   GetPermCode = '/getPermCode',
   TestRetry = '/testRetry',
+  GetCaptcha = '/api/v1/captcha',
 }
 
 /**
@@ -22,6 +23,7 @@ export function loginApi(params: LoginParams, mode: ErrorMessageMode = 'modal') 
     },
     {
       errorMessageMode: mode,
+      isTransformResponse: false,
     },
   );
 }
@@ -50,6 +52,15 @@ export function testRetry() {
         count: 5,
         waitTime: 1000,
       },
+    },
+  );
+}
+
+export function getCaptcha() {
+  return defHttp.get(
+    { url: Api.GetCaptcha },
+    {
+      isReturnNativeResponse: true,
     },
   );
 }
